@@ -40,8 +40,14 @@ class Voxel : public Object3D, SceneGraph::Drawable3D {
                    Shaders::Flat3D& shader, GL::Mesh& mesh, Object3D& parent,
                    SceneGraph::DrawableGroup3D& drawables);
 
-    Color4 scatteringDensityToColor(double density) const;
-    static float getAlphaFromDensity(double density);
+    void setAlpha(double power = 3.0);
+
+    inline void setDensity(double density) {
+        this->density = density;
+    }
+    
+    static float getAlphaFromDensity(double density, double power = 3.0);
+    static Color4 scatteringDensityToColor(double density, double power = 3.0);
     
 
   private:
@@ -50,6 +56,7 @@ class Voxel : public Object3D, SceneGraph::Drawable3D {
     uint id;
     Vector3 size;
     Vector3 pos;
+    double density;
     Color4 color;
     Shaders::Flat3D& shader;
     GL::Mesh& mesh;

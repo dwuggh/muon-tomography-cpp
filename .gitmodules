@@ -1,0 +1,6 @@
+[submodule "ThirdParty/imgui"]
+	path = ThirdParty/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "ThirdParty/magnum-integration"]
+	path = ThirdParty/magnum-integration
+	url = https://github.com/mosra/magnum-integration.git

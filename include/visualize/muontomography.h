@@ -27,6 +27,8 @@
 #include <Magnum/SceneGraph/Object.h>
 #include <Magnum/SceneGraph/Scene.h>
 
+#include <Magnum/ImGuiIntegration/Context.hpp>
+
 #include <armadillo>
 
 #include "grid.h"
@@ -43,6 +45,8 @@ class MuonTomography : public Platform::Application {
     explicit MuonTomography(const Arguments& arguments, const Grid& grid,
                             arma::cube scattering_density);
 
+    void scaleAlpha(double level);
+
 
 
   private:
@@ -51,7 +55,15 @@ class MuonTomography : public Platform::Application {
     void mouseMoveEvent(MouseMoveEvent& event) override;
     void mouseReleaseEvent(MouseEvent& event) override;
 
+
+    inline void sorted_voxels();
+
     Vector2i _previousMousePosition, _mousePressPosition;
+
+    ImGuiIntegration::Context imgui{NoCreate};
+    float opacityLevel;
+
+    
 
     // a cube
     GL::Mesh voxelMesh;

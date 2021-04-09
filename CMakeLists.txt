@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(muon-tomography)
+project(muon-tomography CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,7 +9,7 @@ find_package(Armadillo REQUIRED)
 include_directories(${ARMADILLO_INCLUDE_DIRS})
 
 
-find_package(Corrade REQUIRED Containers)
+find_package(Corrade REQUIRED Containers Main)
 # include_directories(${CORRADE_INCLUDE_DIRS})
 
 find_package(Magnum
@@ -23,8 +23,15 @@ find_package(Magnum
   )
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
+set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui)
+set(WITH_IMGUI ON CACHE BOOL "" FORCE)
+add_subdirectory(ThirdParty/magnum-integration EXCLUDE_FROM_ALL)
+
+# set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Modules/" ${CMAKE_MODULE_PATH})
+find_package(ImGui)
+find_package(MagnumIntegration REQUIRED ImGui)
+
 add_subdirectory(src)
-add_subdirectory(test)
 
 add_executable(${PROJECT_NAME}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
@@ -43,6 +50,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
   ${ARMADILLO_LIBRARIES}
+  Corrade::Main
   Corrade::Utility
   Corrade::Containers
   Magnum::Application
@@ -52,4 +60,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   Magnum::SceneGraph
   Magnum::Primitives
   Magnum::Shaders
+  MagnumIntegration::ImGui
   )
+
+add_subdirectory(test)
