@@ -5,7 +5,6 @@
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
-#include <Magnum/GL/Version.h>
 
 #include <Magnum/Math/Color.h>
 #include <Magnum/Math/Matrix4.h>
@@ -40,14 +39,14 @@ class Voxel : public Object3D, SceneGraph::Drawable3D {
                    Shaders::Flat3D& shader, GL::Mesh& mesh, Object3D& parent,
                    SceneGraph::DrawableGroup3D& drawables);
 
-    void setAlpha(double power = 3.0);
+    void setAlpha(float power = 3.0);
 
     inline void setDensity(double density) {
         this->density = density;
     }
     
-    static float getAlphaFromDensity(double density, double power = 3.0);
-    static Color4 scatteringDensityToColor(double density, double power = 3.0);
+    static float getAlphaFromDensity(double density, float level = 3.0);
+    static Color4 scatteringDensityToColor(double density, float level = 3.0);
     
 
   private:

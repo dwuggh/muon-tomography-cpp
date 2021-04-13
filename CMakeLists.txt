@@ -36,8 +36,9 @@ add_subdirectory(src)
 add_executable(${PROJECT_NAME}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/grid.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/poca.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/visualize/muontomography.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/visualize/meshgroup.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/visualize/voxel.cpp
   )
 
 target_include_directories(${PROJECT_NAME} PUBLIC

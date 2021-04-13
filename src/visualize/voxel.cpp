@@ -1,4 +1,4 @@
-#include "meshgroup.h"
+#include "voxel.h"
 
 Voxel::Voxel(uint id, arma::vec3 size, Vector3 pos, double scatteringDensity,
              Shaders::Flat3D& shader, GL::Mesh& mesh, Object3D& parent,
@@ -12,22 +12,22 @@ Voxel::Voxel(uint id, arma::vec3 size, Vector3 pos, double scatteringDensity,
     // this->scale(this->size);
 }
 
-void Voxel::setAlpha(double power) {
+void Voxel::setAlpha(float power) {
     this->color = scatteringDensityToColor(this->density, power);
 }
 
-float Voxel::getAlphaFromDensity(double density, double level) {
+float Voxel::getAlphaFromDensity(double density, float level) {
     if (density < 0.1) {
         // Debug{} << density;
         return 0.0f;
     }
     else {
         // TODO find a better function
-        return static_cast<float>(Math::pow(density, level));
+        return static_cast<float>(Math::pow(density, static_cast<double>(level)));
     }
 }
 
-Color4 Voxel::scatteringDensityToColor(double density, double level) {
+Color4 Voxel::scatteringDensityToColor(double density, float level) {
     using namespace Math::Literals;
     // add 0.5f, enable color from blue to red
     float saturation = static_cast<float>(density) * 2 - 1.0f;

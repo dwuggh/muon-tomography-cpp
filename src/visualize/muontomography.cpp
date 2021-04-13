@@ -5,29 +5,33 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
     : Platform::Application{arguments}, scattering_density(scattering_density) {
 
     this->setWindowTitle("muon tomography");
-    this->imgui = ImGuiIntegration::Context(Vector2{windowSize()} / dpiScaling(), windowSize(),
-                                            framebufferSize());
     this->opacityLevel = 3;
 
     using namespace Math::Literals;
-    // GL::Renderer::setClearColor(0xa5c9ea_rgbf);
-    // GL::Renderer::enable(GL::Renderer::Feature::DepthTest);
-    // GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
 
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
                                    GL::Renderer::BlendFunction::OneMinusSourceAlpha);
+    Vector2 scaling = Vector2{framebufferSize()} * dpiScaling() / Vector2{windowSize()};
+    Vector2 defaultWindowSize{1920, 1080};
+    Vector2 scaledWindowSize = defaultWindowSize / scaling;
+    this->setWindowSize(
+        {static_cast<int>(scaledWindowSize[0]), static_cast<int>(scaledWindowSize[1])});
+
+    this->imgui = ImGuiIntegration::Context(Vector2{this->windowSize()} / dpiScaling(),
+                                            this->windowSize(), framebufferSize());
 
     Debug{} << "running on" << GL::Context::current().version() << "using"
             << GL::Context::current().rendererString();
+
+    // initialize voxels
+
     this->voxelMesh = MeshTools::compile(Primitives::cubeSolid());
     this->shader    = Shaders::Flat3D(Shaders::Flat3D::Flag::ObjectId);
 
     transformation = Matrix4::rotationX(20.0_degf) * Matrix4::rotationY(40.0_degf);
-    projection = Matrix4::perspectiveProjection(75.0_degf, Vector2{windowSize()}.aspectRatio(),
-                                                0.01f, 100.0f)
-        // * Matrix4::translation(Vector3::zAxis(8.0f))
-        ;
+    projection     = Matrix4::perspectiveProjection(75.0_degf, Vector2{windowSize()}.aspectRatio(),
+                                                0.01f, 100.0f);
 
     this->cameraObject = new Object3D(&this->scene);
     this->camera       = new SceneGraph::Camera3D(*this->cameraObject);
@@ -36,7 +40,7 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
         .setProjectionMatrix(this->projection)
         .setViewport(GL::defaultFramebuffer.viewport().size());
 
-    const auto grain = grid.grain;
+    int grain = grid.grain;
     // sort drawables by their distance to camera
     for (auto i = 0; i < grain; i++) {
         for (auto j = 0; j < grain; j++) {
@@ -54,7 +58,10 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
             }
         }
     }
-
+    auto frameMesh           = MeshTools::compile(Primitives::cubeWireframe());
+    Frame frame{static_cast<uint>(grain * grain * grain), fromArma(grid.d * grain), {0, 0, 0}, shader, frameMesh, scene, this->frameDrawables};
+    // Object3D* frameobj = new Object3D(&this->scene);
+    // SceneGraph::Drawable3D f(frameobj);
 }
 
 void MuonTomography::sorted_voxels() {
@@ -67,7 +74,7 @@ void MuonTomography::sorted_voxels() {
     this->camera->draw(drawableTransformations);
 }
 
-void MuonTomography::scaleAlpha(double level) {
+void MuonTomography::scaleAlpha(float level) {
     // Debug{} << level;
     for (auto voxel : this->voxels) {
         voxel->setAlpha(level);
@@ -98,14 +105,8 @@ void MuonTomography::drawEvent() {
     GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
 
     this->scaleAlpha(this->opacityLevel * 5 + 1);
-    // this->sorted_voxels();
-    auto drawableTransformations = this->camera->drawableTransformations(this->drawables);
-    std::sort(drawableTransformations.begin(), drawableTransformations.end(),
-              [](const std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>& a,
-                 const std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>& b) {
-                  return a.second.translation().z() < b.second.translation().z();
-              });
-    this->camera->draw(drawableTransformations);
+    this->camera->draw(this->frameDrawables);
+    this->sorted_voxels();
 
     // GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
     // GL::AbstractFramebuffer::blit(framebuffer, GL::defaultFramebuffer,
@@ -162,4 +163,8 @@ void MuonTomography::mouseReleaseEvent(MouseEvent& event) {
 
     event.setAccepted();
     redraw();
+}
+void MuonTomography::viewportEvent(ViewportEvent& event) {
+    GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
+    Debug{} << GL::defaultFramebuffer.viewport();
 }

@@ -32,7 +32,8 @@
 #include <armadillo>
 
 #include "grid.h"
-#include "meshgroup.h"
+#include "voxel.h"
+#include "frame.h"
 
 using namespace Magnum;
 
@@ -45,7 +46,7 @@ class MuonTomography : public Platform::Application {
     explicit MuonTomography(const Arguments& arguments, const Grid& grid,
                             arma::cube scattering_density);
 
-    void scaleAlpha(double level);
+    void scaleAlpha(float level);
 
 
 
@@ -55,6 +56,7 @@ class MuonTomography : public Platform::Application {
     void mouseMoveEvent(MouseMoveEvent& event) override;
     void mouseReleaseEvent(MouseEvent& event) override;
 
+    void viewportEvent(ViewportEvent& event) override;
 
     inline void sorted_voxels();
 
@@ -76,6 +78,7 @@ class MuonTomography : public Platform::Application {
     Object3D* cameraObject;
     SceneGraph::Camera3D* camera;
     SceneGraph::DrawableGroup3D drawables;
+    SceneGraph::DrawableGroup3D frameDrawables;
     // GL::Framebuffer framebuffer;
     // GL::Renderbuffer color, objectId, depth;
 };
