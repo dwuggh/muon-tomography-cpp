@@ -1,7 +1,6 @@
 #pragma once
 
 #include <armadillo>
-#include <Eigen/Dense>
 #include <cmath>
 
 #include "grid.h"

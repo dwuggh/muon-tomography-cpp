@@ -53,7 +53,6 @@ target_link_libraries(
   test_poca
   gtest_main
   ${ARMADILLO_LIBRARIES}
-  Eigen3::Eigen
 )
 
 include(GoogleTest)
