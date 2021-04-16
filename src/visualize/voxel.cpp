@@ -9,7 +9,8 @@ Voxel::Voxel(uint id, arma::vec3 size, Vector3 pos, double scatteringDensity,
     this->setDensity(scatteringDensity);
     this->color = this->scatteringDensityToColor(scatteringDensity);
     this->size  = fromArma(size);
-    // this->scale(this->size);
+    // magnum's cube mesh originally has size of 2x2x2 divide size by 2 eliminates this.
+    this->scale(this->size / 2);
 }
 
 void Voxel::setAlpha(float power) {
@@ -24,7 +25,6 @@ float Voxel::getAlphaFromDensity(double density, double level) {
     } else if (density > threshold_max) {
         return 1.0f;
     } else {
-        // TODO find a better function
         double power = level * 5 + 1;
         return static_cast<float>(Math::pow(density, power));
     }

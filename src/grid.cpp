@@ -47,7 +47,7 @@ std::optional<uint64_t> Grid::_get_voxel_index_1(double x, double xi, double xf)
 }
 
 double Grid::calc_density_from_angle(double angle) const {
-    auto dist = this->d[2];
+    auto dist = this->voxelSize[2];
     return angle * angle / dist;
 }
 

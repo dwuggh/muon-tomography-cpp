@@ -15,10 +15,10 @@ class Grid {
     vec3 r1;
     vec3 r2;
     uint grain;
-    vec3 d;
+    vec3 voxelSize;
 
     Grid(vec3 r1, vec3 r2, uint grain = 10) : r1(r1), r2(r2), grain(grain) {
-        this->d = arma::abs(r2 - r1) / grain;
+        this->voxelSize = arma::abs(r2 - r1) / grain;
     }
 
     bool contains(vec3 r) const {

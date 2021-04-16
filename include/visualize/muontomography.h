@@ -54,7 +54,7 @@ class MuonTomography : public Platform::Application {
 
     void viewportEvent(ViewportEvent& event) override;
 
-    inline void sorted_voxels();
+    inline void draw_sorted_voxels();
 
     Vector2i _previousMousePosition, _mousePressPosition;
 

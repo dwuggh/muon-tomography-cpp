@@ -84,7 +84,7 @@ arma::cube calc_scattering_density(std::vector<MuonImage> images, const Grid& gr
         for (uint j = 0; j < grid.grain; j++) {
             for (uint k = 0; k < grid.grain; k++) {
                 auto voxel_data     = arma::vec(mat(i, j, k));
-                auto r              = arma::sum(voxel_data * voxel_data) / n / grid.d[2];
+                auto r              = arma::sum(voxel_data * voxel_data) / n / grid.voxelSize[2];
                 result_mat(i, j, k) = r;
                 density_mat(i, j, k).emplace_back();
             }

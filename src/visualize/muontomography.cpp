@@ -12,6 +12,7 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
     GL::Renderer::enable(GL::Renderer::Feature::Blending);
     GL::Renderer::setBlendFunction(GL::Renderer::BlendFunction::SourceAlpha,
                                    GL::Renderer::BlendFunction::OneMinusSourceAlpha);
+    GL::Renderer::setClearColor(0xf6ffd7_rgbf);
     Vector2 scaling = Vector2{framebufferSize()} * dpiScaling() / Vector2{windowSize()};
     Vector2 defaultWindowSize{1920, 1080};
     Vector2 scaledWindowSize = defaultWindowSize / scaling;
@@ -40,7 +41,12 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
         .setProjectionMatrix(this->projection)
         .setViewport(GL::defaultFramebuffer.viewport().size());
 
-    int grain = grid.grain;
+    int grain      = grid.grain;
+    double _grain  = static_cast<double>(grain);
+    vec3 voxelSize = grid.voxelSize;
+    // normalize by length in z-direction
+    voxelSize = voxelSize / voxelSize[2];
+
     // sort drawables by their distance to camera
     for (auto i = 0; i < grain; i++) {
         for (auto j = 0; j < grain; j++) {
@@ -48,11 +54,16 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
                 double density = scattering_density(i, j, k);
                 uint id        = i * grain * grain + j * grain + k;
                 Vector3 pos{static_cast<float>(i), static_cast<float>(j), static_cast<float>(k)};
+
                 auto voxel =
-                    new Voxel(id, grid.d, pos, density, shader, voxelMesh, scene, drawables);
-                arma::vec3 translation{static_cast<double>(i), static_cast<double>(j),
-                                       static_cast<double>(k)};
-                translation = translation * 2.02 - 20;
+                    new Voxel(id, voxelSize, pos, density, shader, voxelMesh, scene, drawables);
+
+                double _i = static_cast<double>(i);
+                double _j = static_cast<double>(j);
+                double _k = static_cast<double>(k);
+                arma::vec3 translation{_i - (_grain - 1) / 2.0, _j - (_grain - 1) / 2.0,
+                                       _k - (_grain - 1) / 2.0};
+                translation %= voxelSize;
                 voxel->translate(fromArma(translation));
                 this->voxels.emplace_back(voxel);
             }
@@ -60,7 +71,7 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
     }
 }
 
-void MuonTomography::sorted_voxels() {
+void MuonTomography::draw_sorted_voxels() {
     auto drawableTransformations = this->camera->drawableTransformations(this->drawables);
     std::sort(drawableTransformations.begin(), drawableTransformations.end(),
               [](const std::pair<std::reference_wrapper<SceneGraph::Drawable3D>, Matrix4>& a,
@@ -71,7 +82,6 @@ void MuonTomography::sorted_voxels() {
 }
 
 void MuonTomography::scaleAlpha(float level) {
-    // Debug{} << level;
     for (auto voxel : this->voxels) {
         voxel->setAlpha(level);
     }
