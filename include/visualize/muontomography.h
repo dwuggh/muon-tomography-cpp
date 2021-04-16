@@ -31,15 +31,14 @@
 
 #include <armadillo>
 
+#include "frame.h"
 #include "grid.h"
 #include "voxel.h"
-#include "frame.h"
 
 using namespace Magnum;
 
 typedef SceneGraph::Scene<SceneGraph::MatrixTransformation3D> Scene3D;
 typedef SceneGraph::Object<SceneGraph::MatrixTransformation3D> Object3D;
-
 
 class MuonTomography : public Platform::Application {
   public:
@@ -47,8 +46,6 @@ class MuonTomography : public Platform::Application {
                             arma::cube scattering_density);
 
     void scaleAlpha(float level);
-
-
 
   private:
     void drawEvent() override;
@@ -64,8 +61,6 @@ class MuonTomography : public Platform::Application {
 
     ImGuiIntegration::Context imgui{NoCreate};
     float opacityLevel;
-
-    
 
     // a cube
     GL::Mesh voxelMesh;

@@ -2,12 +2,13 @@
 
 #include <armadillo>
 #include <cmath>
+#include <utils.h>
 
 using vec3 = arma::vec3;
 
-inline bool isclose(double x, double target, double threshold = 1E-6) {
-    return std::abs(x - target) < threshold;
-}
+using vec3_int = std::array<int, 3>;
+
+using field4 = arma::field<std::vector<double>>;
 
 class Grid {
   public:
@@ -21,12 +22,19 @@ class Grid {
     }
 
     bool contains(vec3 r) const {
-        return this->get_voxel_index(r).has_value();
+        return this->get_voxel_index_3d(r).has_value();
     }
 
-    std::optional<vec3> get_voxel_index(vec3& r) const;
+    std::optional<vec3_int> get_voxel_index_3d(vec3& r) const;
+    std::optional<int> get_voxel_index_1d(vec3& r) const;
 
-    arma::field<std::vector<double>> gen_voxel_matrix() const;
+    vec3_int from_voxel_index_1d(int index) const;
+
+    double calc_density_from_angle(double angle) const;
+
+    field4 gen_voxel_matrix_3d() const;
+    field4 gen_voxel_matrix_1d() const;
+    arma::mat gen_voxel_matrix_1d_fixed(uint64_t data_size) const;
 
 
   private:

@@ -9,9 +9,9 @@ class MuonImage {
     arma::vec3 vi;
     arma::vec3 vf;
 
- MuonImage(arma::vec3 ri, arma::vec3 rf, arma::vec3 vi, arma::vec3 vf) : ri(ri), rf(rf) {
-        this-> vi = arma::normalise(vi);
-        this-> vf = arma::normalise(vf);
+    MuonImage(arma::vec3 ri, arma::vec3 rf, arma::vec3 vi, arma::vec3 vf) : ri(ri), rf(rf) {
+        this->vi = arma::normalise(vi);
+        this->vf = arma::normalise(vf);
     };
 
     double angle() const {

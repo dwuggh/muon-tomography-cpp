@@ -45,8 +45,8 @@ class Voxel : public Object3D, SceneGraph::Drawable3D {
         this->density = density;
     }
     
-    static float getAlphaFromDensity(double density, float level = 3.0);
-    static Color4 scatteringDensityToColor(double density, float level = 3.0);
+    static float getAlphaFromDensity(double density, double level = 0.5);
+    static Color4 scatteringDensityToColor(double density, double level = 0.5);
     
 
   private:

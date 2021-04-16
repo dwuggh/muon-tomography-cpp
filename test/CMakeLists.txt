@@ -1,5 +1,9 @@
 
-include(GoogleTest)
+# find_package(GTest)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/ThirdParty/googletest
+  ThirdParty/googletest
+  EXCLUDE_FROM_ALL)
 
 
 
@@ -16,3 +20,43 @@ target_link_libraries(ImGuiExample PRIVATE
   Magnum::Magnum
   MagnumIntegration::ImGui
   )
+
+enable_testing()
+
+add_executable(
+  test_readdata
+  test_readdata.cpp
+  ${PROJECT_SOURCE_DIR}/src/readdata.cpp
+  )
+
+target_include_directories(test_readdata PUBLIC
+  ${PROJECT_SOURCE_DIR}/include
+  )
+
+target_link_libraries(
+  test_readdata
+  gtest_main
+  ${ARMADILLO_LIBRARIES}
+)
+
+add_executable(
+  test_poca
+  test_poca.cpp
+  ${MY_SOURCES}
+  )
+
+target_include_directories(test_poca PUBLIC
+  ${PROJECT_SOURCE_DIR}/include
+  )
+
+target_link_libraries(
+  test_poca
+  gtest_main
+  ${ARMADILLO_LIBRARIES}
+  Eigen3::Eigen
+)
+
+include(GoogleTest)
+
+gtest_discover_tests(test_readdata)
+gtest_discover_tests(test_poca)

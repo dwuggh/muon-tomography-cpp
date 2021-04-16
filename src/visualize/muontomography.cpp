@@ -5,7 +5,7 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
     : Platform::Application{arguments}, scattering_density(scattering_density) {
 
     this->setWindowTitle("muon tomography");
-    this->opacityLevel = 3;
+    this->opacityLevel = 0.5;
 
     using namespace Math::Literals;
 
@@ -58,8 +58,14 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
             }
         }
     }
-    auto frameMesh           = MeshTools::compile(Primitives::cubeWireframe());
-    Frame frame{static_cast<uint>(grain * grain * grain), fromArma(grid.d * grain), {0, 0, 0}, shader, frameMesh, scene, this->frameDrawables};
+    auto frameMesh = MeshTools::compile(Primitives::cubeWireframe());
+    Frame frame{static_cast<uint>(grain * grain * grain),
+                fromArma(grid.d * grain),
+                {0, 0, 0},
+                shader,
+                frameMesh,
+                scene,
+                this->frameDrawables};
     // Object3D* frameobj = new Object3D(&this->scene);
     // SceneGraph::Drawable3D f(frameobj);
 }
@@ -104,7 +110,7 @@ void MuonTomography::drawEvent() {
     GL::Renderer::enable(GL::Renderer::Feature::FaceCulling);
     GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
 
-    this->scaleAlpha(this->opacityLevel * 5 + 1);
+    this->scaleAlpha(this->opacityLevel);
     this->camera->draw(this->frameDrawables);
     this->sorted_voxels();
 
@@ -164,6 +170,7 @@ void MuonTomography::mouseReleaseEvent(MouseEvent& event) {
     event.setAccepted();
     redraw();
 }
+
 void MuonTomography::viewportEvent(ViewportEvent& event) {
     GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
     Debug{} << GL::defaultFramebuffer.viewport();

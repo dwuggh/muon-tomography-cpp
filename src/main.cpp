@@ -1,4 +1,5 @@
 #include <armadillo>
+#include <Corrade/Utility/Arguments.h>
 #include <vector>
 
 #include "grid.h"
@@ -7,8 +8,9 @@
 #include "poca.h"
 
 int main(int argc, char** argv) {
+
     Grid grid(vec3{0.0, 0.0, 0.0}, vec3{10.0, 10.0, 10.0});
-    grid.gen_voxel_matrix();
+    grid.gen_voxel_matrix_3d();
     auto scattering_density = arma::cube(10, 10, 10);
     scattering_density.randu();
     scattering_density = scattering_density / scattering_density.max();

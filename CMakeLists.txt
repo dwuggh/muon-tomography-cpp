@@ -33,10 +33,16 @@ find_package(MagnumIntegration REQUIRED ImGui)
 
 add_subdirectory(src)
 
+file(GLOB_RECURSE MY_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/grid.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/poca.cpp
+  )
+
 add_executable(${PROJECT_NAME}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/grid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/poca.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/readdata.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/visualize/muontomography.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/visualize/voxel.cpp
   )
