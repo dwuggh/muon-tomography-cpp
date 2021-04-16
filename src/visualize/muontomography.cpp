@@ -58,16 +58,6 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
             }
         }
     }
-    auto frameMesh = MeshTools::compile(Primitives::cubeWireframe());
-    Frame frame{static_cast<uint>(grain * grain * grain),
-                fromArma(grid.d * grain),
-                {0, 0, 0},
-                shader,
-                frameMesh,
-                scene,
-                this->frameDrawables};
-    // Object3D* frameobj = new Object3D(&this->scene);
-    // SceneGraph::Drawable3D f(frameobj);
 }
 
 void MuonTomography::sorted_voxels() {
@@ -111,12 +101,7 @@ void MuonTomography::drawEvent() {
     GL::Renderer::disable(GL::Renderer::Feature::ScissorTest);
 
     this->scaleAlpha(this->opacityLevel);
-    this->camera->draw(this->frameDrawables);
-    this->sorted_voxels();
-
-    // GL::defaultFramebuffer.clear(GL::FramebufferClear::Color);
-    // GL::AbstractFramebuffer::blit(framebuffer, GL::defaultFramebuffer,
-    //     framebuffer.viewport(), GL::FramebufferBlit::Color);
+    this->draw_sorted_voxels();
 
     swapBuffers();
     redraw();

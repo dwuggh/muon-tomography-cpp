@@ -31,7 +31,6 @@
 
 #include <armadillo>
 
-#include "frame.h"
 #include "grid.h"
 #include "voxel.h"
 
