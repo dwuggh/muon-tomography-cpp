@@ -1,18 +1,21 @@
 #include "poca.h"
 
-using vec3 = arma::vec3;
-
 vec3 PoCA(const MuonImage& image) {
     // vi // vf case
     double threshold = 1E-5;
     if (isclose(image.vi, image.vf, threshold)) {
         return {};
     }
-    vec3 v = arma::normalise(arma::cross(image.vi, image.vf));
+    vec3 v = image.vi.cross(image.vf).normalized();
 
-    arma::mat33 coffs = arma::join_rows(image.vi, image.vf, v);
-    vec3 vals         = image.rf - image.ri;
-    vec3 ts           = arma::solve(coffs, vals);
+    // Eigen::Matrix3d coffs = arma::join_rows(image.vi, image.vf, v);
+    Eigen::Matrix3d coffs;
+    coffs.col(0) = image.vi;
+    coffs.col(1) = image.vf;
+    coffs.col(2) = v;
+
+    vec3 vals = image.rf - image.ri;
+    vec3 ts   = coffs.colPivHouseholderQr().solve(vals);
     return image.ri + image.vi * ts[0] + v * ts[2] / 2;
 }
 
@@ -20,15 +23,21 @@ std::vector<int> get_passing_voxels(const MuonImage& image, const Grid& grid) {
     return get_passing_voxels(image, grid, PoCA(image));
 }
 
-std::vector<int> get_passing_voxels(const MuonImage& image, const Grid& grid, arma::vec3 poca) {
+// TODO add test
+std::vector<int> get_passing_voxels(const MuonImage& image, const Grid& grid, vec3 poca) {
     std::vector<int> path;
     auto poca_index = grid.get_voxel_index_1d(poca).value();
+    vec3 v1         = (poca - image.ri).normalized();
+    vec3 v2         = (image.rf - poca).normalized();
+
+    auto depth = grid.voxelSize[2];
 
     for (auto i = 0;; i++) {
-        arma::vec3 point       = image.ri + image.vi * i;
+        vec3 point             = (image.ri + v1 * i * depth).array() + depth / 2;
         auto point_voxel_index = grid.get_voxel_index_1d(point);
         if (point_voxel_index.has_value()) {
             if (point_voxel_index.value() == poca_index) {
+                path.emplace_back(point_voxel_index.value());
                 break;
             } else {
                 path.emplace_back(point_voxel_index.value());
@@ -37,7 +46,7 @@ std::vector<int> get_passing_voxels(const MuonImage& image, const Grid& grid, ar
     }
 
     for (auto i = 0;; i++) {
-        arma::vec3 point       = image.rf - image.vf * i;
+        vec3 point             = (image.rf - v2 * i * depth).array() - depth / 2;
         auto point_voxel_index = grid.get_voxel_index_1d(point);
         if (point_voxel_index.has_value()) {
             if (point_voxel_index.value() == poca_index) {
@@ -51,44 +60,58 @@ std::vector<int> get_passing_voxels(const MuonImage& image, const Grid& grid, ar
     return path;
 }
 
-arma::cube calc_scattering_density(std::vector<MuonImage> images, const Grid& grid, field4 density_mat) {
-    auto data_size        = images.size();
-    uint64_t data_invalid = 0;
-    auto mat              = grid.gen_voxel_matrix_3d();
+std::vector<double> calcScatteringDensity(std::vector<MuonImage> images, const Grid& grid) {
+
+    PoCAData data(grid);
 
     for (auto& image : images) {
-        auto poca         = PoCA(image);
-        auto _voxel_index = grid.get_voxel_index_3d(poca);
-        if (_voxel_index.has_value()) {
-            auto deflection_angle = image.angle();
-            auto voxel_index      = _voxel_index.value();
-            // auto density          = grid.calc_density_from_angle(deflection_angle);
-            mat(voxel_index[0], voxel_index[1], voxel_index[2]).emplace_back(deflection_angle);
-            // voxels that passed by
-            auto path = get_passing_voxels(image, grid, poca);
-            for (int voxel : path) {
-                auto voxel_index = grid.from_voxel_index_1d(voxel);
-
-                mat(voxel_index[0], voxel_index[1], voxel_index[2]).emplace_back(1.0);
-            }
-        } else {
-            data_invalid++;
-            continue;
-        }
+        data.processImage(image);
     }
 
-    uint64_t n            = data_size - data_invalid;
-    arma::cube result_mat = arma::cube(grid.grain, grid.grain, grid.grain);
+    return data.calcScatteringDensity();
+}
 
-    for (uint i = 0; i < grid.grain; i++) {
-        for (uint j = 0; j < grid.grain; j++) {
-            for (uint k = 0; k < grid.grain; k++) {
-                auto voxel_data     = arma::vec(mat(i, j, k));
-                auto r              = arma::sum(voxel_data * voxel_data) / n / grid.voxelSize[2];
-                result_mat(i, j, k) = r;
-                density_mat(i, j, k).emplace_back();
-            }
+PoCAData::PoCAData(const Grid& grid) : grid(grid) {
+    auto size     = POW3(grid.grain);
+    this->angles  = std::vector<std::vector<double>>(size);
+    this->visited = std::vector<std::vector<int>>(size);
+}
+
+void PoCAData::processImage(const MuonImage& image) {
+    this->image_total++;
+
+    auto poca              = PoCA(image);
+    auto voxel_index_maybe = grid.get_voxel_index_1d(poca);
+    if (voxel_index_maybe.has_value()) {
+        auto deflection_angle = image.angle(poca);
+        auto voxel_index      = voxel_index_maybe.value();
+        angles[voxel_index].emplace_back(deflection_angle);
+
+        // voxels that passed by
+        auto path = get_passing_voxels(image, grid, poca);
+        for (int voxel_index : path) {
+
+            this->visited[voxel_index].emplace_back(1);
         }
+        image_valid++;
+    } else {
+        // invalid data, do nothing
     }
-    return result_mat;
+}
+
+std::vector<double> PoCAData::calcScatteringDensity() const {
+
+    std::vector<double> scatteringDensity(image_valid);
+    int data_counter = 0;
+    for (auto i = 0; i < angles.size(); i++) {
+
+        auto depth     = grid.voxelSize[2];
+        auto f         = [depth](double angle) { return angle * angle / depth; };
+        double density = MT::sum(angles[i], f);
+        int visit      = MT::sum(visited[i]);
+
+        scatteringDensity[data_counter] = density / visit;
+        data_counter++;
+    }
+    return scatteringDensity;
 }

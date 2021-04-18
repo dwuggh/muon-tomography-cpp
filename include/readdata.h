@@ -1,16 +1,15 @@
 #pragma once
 
-#include <armadillo>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
 
 #include "image.h"
 
-using vec4 = arma::vec4;
-using vec3 = arma::vec3;
 
+typedef Eigen::Matrix<double, 6, 1> vec6;
 
 class MuonData {
  public:
@@ -28,4 +27,4 @@ class MuonData {
 };
 
 
-std::vector<MuonImage> read_data(const std::string& filename, arma::vec6 zs);
+std::vector<MuonImage> read_data(const std::string& filename, vec6 zs);

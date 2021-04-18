@@ -1,7 +1,7 @@
 #include "muontomography.h"
 
 MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
-                               arma::cube scattering_density)
+                               data_arr scattering_density)
     : Platform::Application{arguments}, scattering_density(scattering_density) {
 
     this->setWindowTitle("muon tomography");
@@ -19,7 +19,11 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
     this->setWindowSize(
         {static_cast<int>(scaledWindowSize[0]), static_cast<int>(scaledWindowSize[1])});
 
-    this->imgui = ImGuiIntegration::Context(Vector2{this->windowSize()} / dpiScaling(),
+    ImGui::CreateContext();
+    ImGui::GetIO().Fonts->AddFontFromFileTTF("/usr/share/fonts/sarasa-gothic/sarasa-regular.ttc",
+                                             24.0f);
+    this->imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(),
+                                            Vector2{this->windowSize()} / dpiScaling(),
                                             this->windowSize(), framebufferSize());
 
     Debug{} << "running on" << GL::Context::current().version() << "using"
@@ -42,32 +46,21 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
         .setViewport(GL::defaultFramebuffer.viewport().size());
 
     int grain      = grid.grain;
-    double _grain  = static_cast<double>(grain);
     vec3 voxelSize = grid.voxelSize;
     // normalize by length in z-direction
     voxelSize = voxelSize / voxelSize[2];
 
-    // sort drawables by their distance to camera
-    for (auto i = 0; i < grain; i++) {
-        for (auto j = 0; j < grain; j++) {
-            for (auto k = 0; k < grain; k++) {
-                double density = scattering_density(i, j, k);
-                uint id        = i * grain * grain + j * grain + k;
-                Vector3 pos{static_cast<float>(i), static_cast<float>(j), static_cast<float>(k)};
+    for (int i = 0; i < POW3(grain); i++) {
+        auto density = scattering_density[i];
+        vec3 pos     = grid.from_voxel_index_1d(i).cast<double>();
 
-                auto voxel =
-                    new Voxel(id, voxelSize, pos, density, shader, voxelMesh, scene, drawables);
+        vec3 translation = pos.array() - (grain - 1) / 2.0;
+        translation      = translation.array() / voxelSize.array();
 
-                double _i = static_cast<double>(i);
-                double _j = static_cast<double>(j);
-                double _k = static_cast<double>(k);
-                arma::vec3 translation{_i - (_grain - 1) / 2.0, _j - (_grain - 1) / 2.0,
-                                       _k - (_grain - 1) / 2.0};
-                translation %= voxelSize;
-                voxel->translate(fromArma(translation));
-                this->voxels.emplace_back(voxel);
-            }
-        }
+        auto voxel =
+            new Voxel(i, voxelSize, fromVec3(pos), density, shader, voxelMesh, scene, drawables);
+        voxel->translate(fromVec3(translation));
+        this->voxels.emplace_back(voxel);
     }
 }
 
@@ -95,8 +88,8 @@ void MuonTomography::drawEvent() {
     this->imgui.newFrame();
     {
         ImGui::SliderFloat("opacity", &this->opacityLevel, 0.0, 1.0);
-        // ImGui::SetNextWindowPos(ImVec2(650,20), ImGuiCond_FirstUseEver);
-        ImGui::Text("hello");
+        ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
+        // ImGui::Text("hello");
         this->imgui.updateApplicationCursor(*this);
     }
 

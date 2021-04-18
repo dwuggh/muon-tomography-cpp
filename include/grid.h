@@ -1,14 +1,12 @@
 #pragma once
 
-#include <armadillo>
 #include <cmath>
-#include <utils.h>
+#include "utils.h"
 
-using vec3 = arma::vec3;
+using vec3i = Eigen::Vector3i;
 
-using vec3_int = std::array<int, 3>;
+using data_arr = std::vector<double>;
 
-using field4 = arma::field<std::vector<double>>;
 
 class Grid {
   public:
@@ -18,23 +16,21 @@ class Grid {
     vec3 voxelSize;
 
     Grid(vec3 r1, vec3 r2, uint grain = 10) : r1(r1), r2(r2), grain(grain) {
-        this->voxelSize = arma::abs(r2 - r1) / grain;
+        this->voxelSize = (r2 - r1).cwiseAbs() / grain;
     }
 
     bool contains(vec3 r) const {
         return this->get_voxel_index_3d(r).has_value();
     }
 
-    std::optional<vec3_int> get_voxel_index_3d(vec3& r) const;
+    std::optional<vec3i> get_voxel_index_3d(vec3& r) const;
     std::optional<int> get_voxel_index_1d(vec3& r) const;
 
-    vec3_int from_voxel_index_1d(int index) const;
+    vec3i from_voxel_index_1d(int index) const;
 
     double calc_density_from_angle(double angle) const;
 
-    field4 gen_voxel_matrix_3d() const;
-    field4 gen_voxel_matrix_1d() const;
-    arma::mat gen_voxel_matrix_1d_fixed(uint64_t data_size) const;
+    std::vector<std::vector<double>> gen_data_array_1d() const;
 
 
   private:

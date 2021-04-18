@@ -18,24 +18,25 @@
 #include <Magnum/SceneGraph/MatrixTransformation3D.h>
 #include <Magnum/SceneGraph/Object.h>
 
-#include <armadillo>
+
+#include "utils.h"
 
 using namespace Magnum;
 
 typedef SceneGraph::Scene<SceneGraph::MatrixTransformation3D> Scene3D;
 typedef SceneGraph::Object<SceneGraph::MatrixTransformation3D> Object3D;
 
-inline Vector3 fromArma(arma::vec3 vec) {
-    return Vector3{
-        static_cast<float>(vec[0]),
-        static_cast<float>(vec[1]),
-        static_cast<float>(vec[2]),
-    };
-}
+// inline Vector3 fromArma(arma::vec3 vec) {
+//     return Vector3{
+//         static_cast<float>(vec[0]),
+//         static_cast<float>(vec[1]),
+//         static_cast<float>(vec[2]),
+//     };
+// }
 
 class Voxel : public Object3D, SceneGraph::Drawable3D {
   public:
-    explicit Voxel(uint id, arma::vec3 size, Vector3 pos, double scatteringDensity,
+    explicit Voxel(uint id, vec3 size, Vector3 pos, double scatteringDensity,
                    Shaders::Flat3D& shader, GL::Mesh& mesh, Object3D& parent,
                    SceneGraph::DrawableGroup3D& drawables);
 

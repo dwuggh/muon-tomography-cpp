@@ -29,8 +29,6 @@
 
 #include <Magnum/ImGuiIntegration/Context.hpp>
 
-#include <armadillo>
-
 #include "grid.h"
 #include "voxel.h"
 
@@ -39,10 +37,14 @@ using namespace Magnum;
 typedef SceneGraph::Scene<SceneGraph::MatrixTransformation3D> Scene3D;
 typedef SceneGraph::Object<SceneGraph::MatrixTransformation3D> Object3D;
 
+inline Vector3 fromVec3(vec3 v) {
+    return Vector3{static_cast<float>(v[0]), static_cast<float>(v[1]), static_cast<float>(v[2])};
+}
+
 class MuonTomography : public Platform::Application {
   public:
     explicit MuonTomography(const Arguments& arguments, const Grid& grid,
-                            arma::cube scattering_density);
+                            data_arr scattering_density);
 
     void scaleAlpha(float level);
 
@@ -63,7 +65,7 @@ class MuonTomography : public Platform::Application {
 
     // a cube
     GL::Mesh voxelMesh;
-    arma::cube scattering_density;
+    data_arr scattering_density;
     Shaders::Flat3D shader;
     Matrix4 transformation;
     Matrix4 projection;

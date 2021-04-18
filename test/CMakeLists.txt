@@ -36,7 +36,7 @@ target_include_directories(test_readdata PUBLIC
 target_link_libraries(
   test_readdata
   gtest_main
-  ${ARMADILLO_LIBRARIES}
+  Eigen3::Eigen
 )
 
 add_executable(
@@ -52,7 +52,7 @@ target_include_directories(test_poca PUBLIC
 target_link_libraries(
   test_poca
   gtest_main
-  ${ARMADILLO_LIBRARIES}
+  Eigen3::Eigen
 )
 
 include(GoogleTest)

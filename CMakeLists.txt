@@ -5,9 +5,7 @@ project(muon-tomography CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Armadillo REQUIRED)
-include_directories(${ARMADILLO_INCLUDE_DIRS})
-
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 find_package(Corrade REQUIRED Containers Main)
 # include_directories(${CORRADE_INCLUDE_DIRS})
@@ -25,6 +23,7 @@ set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui)
 set(WITH_IMGUI ON CACHE BOOL "" FORCE)
+set(WITH_EIGEN ON CACHE BOOL "" FORCE)
 add_subdirectory(ThirdParty/magnum-integration EXCLUDE_FROM_ALL)
 
 # set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Modules/" ${CMAKE_MODULE_PATH})
@@ -53,10 +52,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include/visualize
   )
 
-# target_link_libraries(${PROJECT_NAME} )
-
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  ${ARMADILLO_LIBRARIES}
+  Eigen3::Eigen
   Corrade::Main
   Corrade::Utility
   Corrade::Containers

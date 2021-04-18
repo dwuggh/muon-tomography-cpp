@@ -7,16 +7,16 @@ MuonImage MuonData::get_muon_image() {
     vec3 dri = ri2 - ri1;
     double t1  = (zi - ri1[2]) / dri[2];
     vec3 ri  = ri1 + t1 * dri;
-    vec3 vi = arma::normalise(dri);
+    vec3 vi = dri.normalized();
 
     vec3 drf = rf2 - rf1;
     double t2  = (zf - rf2[2]) / drf[2];
     vec3 rf  = rf2 + t2 * drf;
-    vec3 vf  = arma::normalise(drf);
+    vec3 vf  = drf.normalized();
     return MuonImage{ri, rf, vi, vf};
 }
 
-std::vector<MuonImage> read_data(const std::string& filename, arma::vec6 zs) {
+std::vector<MuonImage> read_data(const std::string& filename, vec6 zs) {
     std::ifstream in;
     std::vector<MuonImage> images;
     in.open(filename);

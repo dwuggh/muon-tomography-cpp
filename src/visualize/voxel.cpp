@@ -1,6 +1,6 @@
 #include "voxel.h"
 
-Voxel::Voxel(uint id, arma::vec3 size, Vector3 pos, double scatteringDensity,
+Voxel::Voxel(uint id, vec3 size, Vector3 pos, double scatteringDensity,
              Shaders::Flat3D& shader, GL::Mesh& mesh, Object3D& parent,
              SceneGraph::DrawableGroup3D& drawables)
     : Object3D{&parent}, SceneGraph::Drawable3D{*this, &drawables}, id(id), pos(pos),
@@ -8,7 +8,8 @@ Voxel::Voxel(uint id, arma::vec3 size, Vector3 pos, double scatteringDensity,
 
     this->setDensity(scatteringDensity);
     this->color = this->scatteringDensityToColor(scatteringDensity);
-    this->size  = fromArma(size);
+    // TODO
+    this->size  = {static_cast<float>(size[0]), static_cast<float>(size[1]), static_cast<float>(size[2])};
     // magnum's cube mesh originally has size of 2x2x2 divide size by 2 eliminates this.
     this->scale(this->size / 2);
 }
