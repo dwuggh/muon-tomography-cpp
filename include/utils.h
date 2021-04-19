@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <eigen3/Eigen/Dense>
+#include <iostream>
 
 #define POW3(x) (x) * (x) * (x)
 
@@ -21,7 +22,8 @@ inline bool isclose(vec3 x, vec3 target, double threshold = 1E-6) {
 }
 
 namespace MT {
-template <typename T> T sum(std::vector<T> vec) {
+template <typename T>
+T sum(std::vector<T> vec) {
 
     T sum_of_eles;
     for (T i : vec) {
@@ -30,13 +32,45 @@ template <typename T> T sum(std::vector<T> vec) {
     return sum_of_eles;
 }
 
-template <typename T, typename F> T sum(std::vector<T> vec, F f) {
+template <typename T, typename F>
+T sum(std::vector<T> vec, F f) {
 
     T sum_of_eles;
     for (T i : vec) {
         sum_of_eles += f(i);
     }
     return sum_of_eles;
+}
+
+template <typename T, int _Rows>
+int min_index(const Eigen::Matrix<T, _Rows, 1> vec) {
+    auto min_index = 0;
+    T minval       = vec[0];
+    for (int i = 1; i < _Rows; i++) {
+        if (minval > vec[i]) {
+            minval    = vec[i];
+            min_index = i;
+        }
+    }
+    return min_index;
+}
+
+template <typename T, int _Rows>
+int max_index(const Eigen::Matrix<T, _Rows, 1> vec) {
+    auto max_index = 0;
+    T maxval       = vec[0];
+    for (int i = 1; i < _Rows; i++) {
+        if (maxval < vec[i]) {
+            maxval    = vec[i];
+            max_index = i;
+        }
+    }
+    return max_index;
+}
+
+inline void print(vec3 v) { std::cout << v[0] << " " << v[1] << " " << v[2] << std::endl; }
+inline void print(vec3 v, const char* str) {
+    std::cout << str << v[0] << " " << v[1] << " " << v[2] << std::endl;
 }
 
 } // namespace MT

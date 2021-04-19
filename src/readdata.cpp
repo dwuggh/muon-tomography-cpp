@@ -4,15 +4,15 @@ MuonData::MuonData(vec3 ri1, vec3 ri2, vec3 rf1, vec3 rf2, double z1, double z2)
     : ri1(ri1), ri2(ri2), rf1(rf1), rf2(rf2), zi(z1), zf(z2) {}
 
 MuonImage MuonData::get_muon_image() {
-    vec3 dri = ri2 - ri1;
-    double t1  = (zi - ri1[2]) / dri[2];
-    vec3 ri  = ri1 + t1 * dri;
-    vec3 vi = dri.normalized();
+    vec3 dri  = ri2 - ri1;
+    double t1 = (zi - ri1[2]) / dri[2];
+    vec3 ri   = ri1 + t1 * dri;
+    vec3 vi   = dri.normalized();
 
-    vec3 drf = rf2 - rf1;
-    double t2  = (zf - rf2[2]) / drf[2];
-    vec3 rf  = rf2 + t2 * drf;
-    vec3 vf  = drf.normalized();
+    vec3 drf  = rf2 - rf1;
+    double t2 = (zf - rf2[2]) / drf[2];
+    vec3 rf   = rf2 + t2 * drf;
+    vec3 vf   = drf.normalized();
     return MuonImage{ri, rf, vi, vf};
 }
 

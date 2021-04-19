@@ -1,15 +1,13 @@
 #pragma once
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <cmath>
+#include <iostream>
 
 #include "grid.h"
 #include "image.h"
 
 vec3 PoCA(const MuonImage& image);
-
-std::vector<int> get_passing_voxels(const MuonImage& image, const Grid& grid);
-std::vector<int> get_passing_voxels(const MuonImage& image, const Grid& grid, vec3 poca);
 
 /*
  * perform the entire PoCA reconstruction procedure
@@ -29,6 +27,12 @@ class PoCAData {
     explicit PoCAData(const Grid& grid);
 
     std::vector<double> calcScatteringDensity() const;
+    std::vector<int> getPassingVoxels(const MuonImage& image) const;
+    std::vector<int> getPassingVoxels(const MuonImage& image, vec3 poca) const;
 
     void processImage(const MuonImage& image);
+
+  private:
+    void _getPassingVoxels(std::vector<int>& path, double r1, double r2, double interval, vec3 ri,
+                           vec3 v) const;
 };

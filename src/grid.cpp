@@ -44,7 +44,7 @@ std::optional<uint64_t> Grid::_get_voxel_index_1(double x, double x1, double x2)
     if (ratio < 0 || ratio > 1) {
         return {};
     }
-    return static_cast<uint64_t>(std::round(ratio * this->grain));
+    return static_cast<uint64_t>(ratio * static_cast<double>(grain));
 }
 
 double Grid::calc_density_from_angle(double angle) const {

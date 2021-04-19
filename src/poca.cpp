@@ -19,45 +19,40 @@ vec3 PoCA(const MuonImage& image) {
     return image.ri + image.vi * ts[0] + v * ts[2] / 2;
 }
 
-std::vector<int> get_passing_voxels(const MuonImage& image, const Grid& grid) {
-    return get_passing_voxels(image, grid, PoCA(image));
+std::vector<int> PoCAData::getPassingVoxels(const MuonImage& image) const {
+    return getPassingVoxels(image, PoCA(image));
 }
 
 // TODO add test
-std::vector<int> get_passing_voxels(const MuonImage& image, const Grid& grid, vec3 poca) {
+std::vector<int> PoCAData::getPassingVoxels(const MuonImage& image, vec3 poca) const {
     std::vector<int> path;
-    auto poca_index = grid.get_voxel_index_1d(poca).value();
-    vec3 v1         = (poca - image.ri).normalized();
-    vec3 v2         = (image.rf - poca).normalized();
+    vec3 v1 = (poca - image.ri);
+    vec3 v2 = (image.rf - poca);
 
-    auto depth = grid.voxelSize[2];
-
-    for (auto i = 0;; i++) {
-        vec3 point             = (image.ri + v1 * i * depth).array() + depth / 2;
-        auto point_voxel_index = grid.get_voxel_index_1d(point);
-        if (point_voxel_index.has_value()) {
-            if (point_voxel_index.value() == poca_index) {
-                path.emplace_back(point_voxel_index.value());
-                break;
-            } else {
-                path.emplace_back(point_voxel_index.value());
-            }
-        }
-    }
-
-    for (auto i = 0;; i++) {
-        vec3 point             = (image.rf - v2 * i * depth).array() - depth / 2;
-        auto point_voxel_index = grid.get_voxel_index_1d(point);
-        if (point_voxel_index.has_value()) {
-            if (point_voxel_index.value() == poca_index) {
-                break;
-            } else {
-                path.emplace_back(point_voxel_index.value());
-            }
-        }
-    }
+    vec3 vr1 = v1.array() / grid.voxelSize.array();
+    int axis = MT::max_index(vr1);
+    v1 = v1 / v1[axis];
+    _getPassingVoxels(path, image.ri[axis], poca[axis], grid.voxelSize[axis], image.ri, v1);
+    vec3 vr2 = v2.array() / grid.voxelSize.array();
+    axis     = MT::max_index(vr2);
+    v2 = v2 / v2[axis];
+    _getPassingVoxels(path, poca[axis], image.rf[axis], grid.voxelSize[axis], poca, v2);
 
     return path;
+}
+
+void PoCAData::_getPassingVoxels(std::vector<int>& path, double r1, double r2, double interval,
+                                 vec3 ri, vec3 v) const {
+    for (double z = r1; z <= r2; z += interval) {
+        vec3 point = ri + v * z;
+        auto point_voxel_index_maybe = grid.get_voxel_index_1d(point);
+        if (point_voxel_index_maybe.has_value()) {
+            auto point_voxel_index = point_voxel_index_maybe.value();
+            if (std::find(path.begin(), path.end(), point_voxel_index) == path.end()) {
+                path.emplace_back(point_voxel_index_maybe.value());
+            }
+        }
+    }
 }
 
 std::vector<double> calcScatteringDensity(std::vector<MuonImage> images, const Grid& grid) {
@@ -88,7 +83,7 @@ void PoCAData::processImage(const MuonImage& image) {
         angles[voxel_index].emplace_back(deflection_angle);
 
         // voxels that passed by
-        auto path = get_passing_voxels(image, grid, poca);
+        auto path = getPassingVoxels(image, poca);
         for (int voxel_index : path) {
 
             this->visited[voxel_index].emplace_back(1);

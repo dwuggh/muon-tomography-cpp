@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <iostream>
 #include "utils.h"
 
 using vec3i = Eigen::Vector3i;
