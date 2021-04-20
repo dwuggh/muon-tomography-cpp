@@ -40,8 +40,63 @@ std::vector<MuonImage> read_data(const std::string& filename, vec6 zs) {
 
         MuonData data{ri1, ri2, rf1, rf2, zs[4], zs[5]};
         auto image = data.get_muon_image();
+        // std::cout << image;
         images.emplace_back(image);
     }
 
     return images;
+}
+
+std::vector<MuonImage> read_data(std::istream& in, vec6 zs) {
+    std::vector<MuonImage> images;
+    if (!in.good()) {
+        exit(1);
+    }
+
+    std::string buffer;
+    while (std::getline(in, buffer)) {
+        if (buffer.find_first_not_of(' ') == std::string::npos) {
+            continue;
+        }
+        std::stringstream line{buffer};
+        vec3 ri1, ri2, rf1, rf2;
+        int i;
+        double p;
+        line >> i >> ri1[0] >> ri1[1] >> ri2[0] >> ri2[1] >> rf1[0] >> rf1[1] >> rf2[0] >> rf2[1] >>
+            p;
+        ri1[2] = zs[0];
+        ri2[2] = zs[1];
+        rf1[2] = zs[2];
+        rf2[2] = zs[3];
+
+        MuonData data{ri1, ri2, rf1, rf2, zs[4], zs[5]};
+        auto image = data.get_muon_image();
+        images.emplace_back(image);
+    }
+
+    return images;
+}
+
+std::vector<double> loadScatteringDensity(std::istream& in) {
+    std::vector<double> density;
+    double d;
+    while (true) {
+        in >> d;
+        if (in.good()) {
+            density.emplace_back(d);
+        } else {
+            break;
+        }
+    }
+    return density;
+}
+
+std::vector<double> loadScatteringDensity(const std::string& filename) {
+    std::ifstream in;
+    in.open(filename);
+    if (!in.good()) {
+        exit(1);
+    }
+
+    return loadScatteringDensity(in);
 }

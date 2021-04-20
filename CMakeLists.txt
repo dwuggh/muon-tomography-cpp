@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 find_package(Corrade REQUIRED Containers Main)
-# include_directories(${CORRADE_INCLUDE_DIRS})
+include_directories(${CORRADE_INCLUDE_DIRS})
 
 find_package(Magnum
   REQUIRED

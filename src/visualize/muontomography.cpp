@@ -20,7 +20,7 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
         {static_cast<int>(scaledWindowSize[0]), static_cast<int>(scaledWindowSize[1])});
 
     ImGui::CreateContext();
-    ImGui::GetIO().Fonts->AddFontFromFileTTF("/usr/share/fonts/sarasa-gothic/sarasa-regular.ttc",
+    ImGui::GetIO().Fonts->AddFontFromFileTTF("../assets/sarasa-regular.ttc",
                                              24.0f);
     this->imgui = ImGuiIntegration::Context(*ImGui::GetCurrentContext(),
                                             Vector2{this->windowSize()} / dpiScaling(),
@@ -38,9 +38,13 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
     projection     = Matrix4::perspectiveProjection(75.0_degf, Vector2{windowSize()}.aspectRatio(),
                                                 0.01f, 100.0f);
 
+    
+    auto offset = grid.voxelSize[MT::max_index(grid.voxelSize)] * grid.grain / 10.0;
+    Debug{} << "offset" << offset;
     this->cameraObject = new Object3D(&this->scene);
     this->camera       = new SceneGraph::Camera3D(*this->cameraObject);
-    this->cameraObject->translate(Vector3::zAxis(15.0f));
+    // this->cameraObject->translate(Vector3::zAxis(offset));
+    this->cameraObject->translate(Vector3::zAxis(offset));
     this->camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
         .setProjectionMatrix(this->projection)
         .setViewport(GL::defaultFramebuffer.viewport().size());
@@ -50,12 +54,15 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
     // normalize by length in z-direction
     voxelSize = voxelSize / voxelSize[2];
 
+    auto max_density = std::max_element(scattering_density.begin(), scattering_density.end());
+
     for (int i = 0; i < POW3(grain); i++) {
         auto density = scattering_density[i];
+        density = density / *max_density.base();
         vec3 pos     = grid.from_voxel_index_1d(i).cast<double>();
 
         vec3 translation = pos.array() - (grain - 1) / 2.0;
-        translation      = translation.array() / voxelSize.array();
+        translation      = translation.array() * voxelSize.array();
 
         auto voxel =
             new Voxel(i, voxelSize, fromVec3(pos), density, shader, voxelMesh, scene, drawables);

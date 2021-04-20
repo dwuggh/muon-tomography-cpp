@@ -43,6 +43,7 @@ add_executable(
   test_poca
   test_poca.cpp
   ${POCA_SOURCES}
+  ${PROJECT_SOURCE_DIR}/src/readdata.cpp
   )
 
 target_include_directories(test_poca PUBLIC

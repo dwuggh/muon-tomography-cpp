@@ -3,6 +3,7 @@
 #include <cmath>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
+#include <functional>
 
 #define POW3(x) (x) * (x) * (x)
 
@@ -22,21 +23,26 @@ inline bool isclose(vec3 x, vec3 target, double threshold = 1E-6) {
 }
 
 namespace MT {
-template <typename T>
-T sum(std::vector<T> vec) {
 
-    T sum_of_eles;
+template <typename T>
+using Func = std::function<T(T)>;
+
+
+template <typename T>
+T sum(const std::vector<T>& vec) {
+
+    T sum_of_eles = 0;
     for (T i : vec) {
         sum_of_eles += i;
     }
     return sum_of_eles;
 }
 
-template <typename T, typename F>
-T sum(std::vector<T> vec, F f) {
+template <typename T>
+T sum(const std::vector<T>& vec, Func<T> f) {
 
-    T sum_of_eles;
-    for (T i : vec) {
+    T sum_of_eles = 0;
+    for (auto i : vec) {
         sum_of_eles += f(i);
     }
     return sum_of_eles;

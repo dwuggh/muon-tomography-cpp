@@ -26,7 +26,8 @@ float Voxel::getAlphaFromDensity(double density, double level) {
     } else if (density > threshold_max) {
         return 1.0f;
     } else {
-        double power = level * 5 + 1;
+        // double power = level * 5 + 1;
+        double power = 0.5;
         return static_cast<float>(Math::pow(density, power));
     }
 }

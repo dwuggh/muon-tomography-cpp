@@ -2,21 +2,41 @@
 
 vec3 PoCA(const MuonImage& image) {
     // vi // vf case
-    double threshold = 1E-5;
-    if (isclose(image.vi, image.vf, threshold)) {
-        return {};
+
+    // double threshold = 1E-5;
+    // if (isclose(image.vi, image.vf, threshold)) {
+    //     return {};
+    // }
+    // vec3 v = image.vi.cross(image.vf).normalized();
+
+    // // Eigen::Matrix3d coffs = arma::join_rows(image.vi, image.vf, v);
+    // Eigen::Matrix3d coffs;
+    // coffs.col(0) = image.vi;
+    // coffs.col(1) = image.vf;
+    // coffs.col(2) = v;
+
+    // vec3 vals = image.rf - image.ri;
+    // vec3 ts   = coffs.colPivHouseholderQr().solve(vals);
+    // return image.ri + image.vi * ts[0] + v * ts[2] / 2;
+
+    double a     = image.vi.dot(image.vi);
+    double b     = image.vi.dot(image.vf);
+    double c     = image.vf.dot(image.vf);
+    vec3 w = image.ri - image.rf;
+    double d     = image.vi.dot(w);
+    double e     = image.vf.dot(w);
+    double delta = a * c - b * b;
+    if (isclose(delta, 0)) {
+        // std::cout << "delta close to zero: " << image;
+        return {1E6, 1E6, 1E6};
     }
-    vec3 v = image.vi.cross(image.vf).normalized();
-
-    // Eigen::Matrix3d coffs = arma::join_rows(image.vi, image.vf, v);
-    Eigen::Matrix3d coffs;
-    coffs.col(0) = image.vi;
-    coffs.col(1) = image.vf;
-    coffs.col(2) = v;
-
-    vec3 vals = image.rf - image.ri;
-    vec3 ts   = coffs.colPivHouseholderQr().solve(vals);
-    return image.ri + image.vi * ts[0] + v * ts[2] / 2;
+    double t_in  = (b * e - c * d) / delta;
+    double t_out = (a * e - b * d) / delta;
+    vec3 p_in = image.ri + t_in * image.vi;
+    vec3 p_out = image.rf + t_out * image.vf;
+    vec3 poca = (p_in + p_out) / 2;
+    // MT::print(poca, "poca: ");
+    return poca;
 }
 
 std::vector<int> PoCAData::getPassingVoxels(const MuonImage& image) const {
@@ -31,11 +51,11 @@ std::vector<int> PoCAData::getPassingVoxels(const MuonImage& image, vec3 poca) c
 
     vec3 vr1 = v1.array() / grid.voxelSize.array();
     int axis = MT::max_index(vr1);
-    v1 = v1 / v1[axis];
+    v1       = v1 / v1[axis];
     _getPassingVoxels(path, image.ri[axis], poca[axis], grid.voxelSize[axis], image.ri, v1);
     vec3 vr2 = v2.array() / grid.voxelSize.array();
     axis     = MT::max_index(vr2);
-    v2 = v2 / v2[axis];
+    v2       = v2 / v2[axis];
     _getPassingVoxels(path, poca[axis], image.rf[axis], grid.voxelSize[axis], poca, v2);
 
     return path;
@@ -44,7 +64,7 @@ std::vector<int> PoCAData::getPassingVoxels(const MuonImage& image, vec3 poca) c
 void PoCAData::_getPassingVoxels(std::vector<int>& path, double r1, double r2, double interval,
                                  vec3 ri, vec3 v) const {
     for (double z = r1; z <= r2; z += interval) {
-        vec3 point = ri + v * z;
+        vec3 point                   = ri + v * z;
         auto point_voxel_index_maybe = grid.get_voxel_index_1d(point);
         if (point_voxel_index_maybe.has_value()) {
             auto point_voxel_index = point_voxel_index_maybe.value();
@@ -63,6 +83,8 @@ std::vector<double> calcScatteringDensity(std::vector<MuonImage> images, const G
         data.processImage(image);
     }
 
+    std::cout << "total image number: " << data.image_total << " valid images: " << data.image_valid
+              << std::endl;
     return data.calcScatteringDensity();
 }
 
@@ -96,16 +118,18 @@ void PoCAData::processImage(const MuonImage& image) {
 
 std::vector<double> PoCAData::calcScatteringDensity() const {
 
-    std::vector<double> scatteringDensity(image_valid);
+    std::vector<double> scatteringDensity(angles.size());
     int data_counter = 0;
     for (auto i = 0; i < angles.size(); i++) {
 
-        auto depth     = grid.voxelSize[2];
-        auto f         = [depth](double angle) { return angle * angle / depth; };
-        double density = MT::sum(angles[i], f);
-        int visit      = MT::sum(visited[i]);
+        auto depth         = grid.voxelSize[2];
+        MT::Func<double> f = [depth](double angle) { return angle * angle / depth; };
+        double density     = MT::sum(angles[i], f);
+        int visit          = MT::sum(visited[i]);
 
-        scatteringDensity[data_counter] = density / visit;
+        // std::cout << density << " " << visit << std::endl;
+
+        scatteringDensity[i] = density / (visit + 1);
         data_counter++;
     }
     return scatteringDensity;
