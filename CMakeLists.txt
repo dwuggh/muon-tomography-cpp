@@ -32,7 +32,7 @@ find_package(MagnumIntegration REQUIRED ImGui)
 
 add_subdirectory(src)
 
-file(GLOB_RECURSE MY_SOURCES
+file(GLOB_RECURSE POCA_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/grid.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/poca.cpp
   )
@@ -65,6 +65,23 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   Magnum::Primitives
   Magnum::Shaders
   MagnumIntegration::ImGui
+  )
+
+set(TERM_NAME ${PROJECT_NAME}_TERM)
+
+add_executable(${TERM_NAME}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/bin/terminal.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/readdata.cpp
+  ${POCA_SOURCES}
+  )
+
+target_include_directories(${TERM_NAME} PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+  Eigen3::Eigen
   )
 
 add_subdirectory(test)

@@ -42,7 +42,7 @@ target_link_libraries(
 add_executable(
   test_poca
   test_poca.cpp
-  ${MY_SOURCES}
+  ${POCA_SOURCES}
   )
 
 target_include_directories(test_poca PUBLIC
