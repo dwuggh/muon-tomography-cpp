@@ -37,7 +37,7 @@ Color4 Voxel::scatteringDensityToColor(double density, double level) {
     // add 0.5f, enable color from blue to red
     float saturation = static_cast<float>(density) * 2 - 1.0f;
     float alpha      = getAlphaFromDensity(density, level);
-    return Color4::fromHsv({0.0_degf, saturation, 0.8f}, alpha);
+    return Color4::fromHsv({0.0_degf, saturation, 0.5f}, alpha);
 }
 
 void Voxel::draw(const Matrix4& transformationMatrix, SceneGraph::Camera3D& camera) {

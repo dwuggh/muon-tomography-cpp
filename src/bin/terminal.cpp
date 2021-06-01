@@ -8,7 +8,10 @@
 
 
 int main(int argc, char** argv) {
-    Grid grid{vec3{-295.0, -120.0, -120.0}, vec3{295.0, 120.0, 120.0}, 20};
+    const int voxel_len = 2;
+    const vec3 r1 = vec3{-25.0, -25.0, -11.0};
+    const vec3 r2 = - r1;
+    Grid grid{r1, r2, voxel_len};
     std::string input_filename;
     if (argc > 1) {
         input_filename = argv[1];
@@ -16,7 +19,9 @@ int main(int argc, char** argv) {
         input_filename = "test.txt";
     }
     vec6 zs;
-    zs << -250, -150, 150, 250, -150, 150;
+    double z1 = 15, z2 = 11;
+    double z3 = 11;
+    zs << -z1, -z2, z2, z1, -z3, z3;
     auto images = read_data(input_filename, zs);
     auto density = calcScatteringDensity(images, grid);
 

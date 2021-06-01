@@ -25,23 +25,36 @@ std::vector<MuonImage> read_data(const std::string& filename, vec6 zs) {
     }
 
     std::string buffer;
-    while (std::getline(in, buffer)) {
+    while (true) {
 
-        std::stringstream line{buffer};
-        vec3 ri1, ri2, rf1, rf2;
-        int i;
-        double p;
-        line >> i >> ri1[0] >> ri1[1] >> ri2[0] >> ri2[1] >> rf1[0] >> rf1[1] >> rf2[0] >> rf2[1] >>
-            p;
-        ri1[2] = zs[0];
-        ri2[2] = zs[1];
-        rf1[2] = zs[2];
-        rf2[2] = zs[3];
+        // std::stringstream line{buffer};
+        // vec3 ri1, ri2, rf1, rf2;
+        // int i;
+        double x1, y1, x2, y2, x3, y3, x4, y4;
+        // double p;
+        // line >> i >> ri1[0] >> ri1[1] >> ri2[0] >> ri2[1] >> rf1[0] >> rf1[1] >> rf2[0] >> rf2[1] >> p;
+        in >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> x4 >> y4;
 
-        MuonData data{ri1, ri2, rf1, rf2, zs[4], zs[5]};
-        auto image = data.get_muon_image();
-        // std::cout << image;
-        images.emplace_back(image);
+        if (in.good()) {
+            vec3 ri1 = {x1, y1, zs[0]};
+            vec3 ri2 = {x2, y2, zs[1]};
+            vec3 rf1 = {x3, y3, zs[2]};
+            vec3 rf2 = {x4, y4, zs[3]};
+            MuonData data{ri1, ri2, rf1, rf2, zs[4], zs[5]};
+            auto image = data.get_muon_image();
+            // std::cout << image;
+            images.emplace_back(image);
+        } else {
+            break;
+        }
+
+
+
+        // ri1[2] = zs[0];
+        // ri2[2] = zs[1];
+        // rf1[2] = zs[2];
+        // rf2[2] = zs[3];
+
     }
 
     return images;

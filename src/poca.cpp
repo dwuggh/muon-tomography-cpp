@@ -89,7 +89,7 @@ std::vector<double> calcScatteringDensity(std::vector<MuonImage> images, const G
 }
 
 PoCAData::PoCAData(const Grid& grid) : grid(grid) {
-    auto size     = POW3(grid.grain);
+    auto size     = SIZE3(grid.grain);
     this->angles  = std::vector<std::vector<double>>(size);
     this->visited = std::vector<std::vector<int>>(size);
 }

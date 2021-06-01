@@ -6,6 +6,7 @@
 #include <functional>
 
 #define POW3(x) (x) * (x) * (x)
+#define SIZE3(x) x[0] * x[1] * x[2]
 
 using vec3 = Eigen::Vector3d;
 

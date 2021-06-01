@@ -36,32 +36,33 @@ MuonTomography::MuonTomography(const Arguments& arguments, const Grid& grid,
 
     transformation = Matrix4::rotationX(20.0_degf) * Matrix4::rotationY(40.0_degf);
     projection     = Matrix4::perspectiveProjection(75.0_degf, Vector2{windowSize()}.aspectRatio(),
-                                                0.01f, 100.0f);
+                                                0.01f, 1000.0f);
 
     
-    auto offset = grid.voxelSize[MT::max_index(grid.voxelSize)] * grid.grain / 10.0;
+    vec3 gridSize = (grid.r2 - grid.r1).cwiseAbs();
+    auto offset = gridSize[MT::max_index(gridSize)];
     Debug{} << "offset" << offset;
     this->cameraObject = new Object3D(&this->scene);
     this->camera       = new SceneGraph::Camera3D(*this->cameraObject);
     // this->cameraObject->translate(Vector3::zAxis(offset));
-    this->cameraObject->translate(Vector3::zAxis(offset));
+    this->cameraObject->translate(Vector3::zAxis(60));
     this->camera->setAspectRatioPolicy(SceneGraph::AspectRatioPolicy::Extend)
         .setProjectionMatrix(this->projection)
         .setViewport(GL::defaultFramebuffer.viewport().size());
 
-    int grain      = grid.grain;
+    vec3 grain      = grid.grain;
     vec3 voxelSize = grid.voxelSize;
     // normalize by length in z-direction
     voxelSize = voxelSize / voxelSize[2];
 
     auto max_density = std::max_element(scattering_density.begin(), scattering_density.end());
 
-    for (int i = 0; i < POW3(grain); i++) {
+    for (int i = 0; i < SIZE3(grain); i++) {
         auto density = scattering_density[i];
         density = density / *max_density.base();
         vec3 pos     = grid.from_voxel_index_1d(i).cast<double>();
 
-        vec3 translation = pos.array() - (grain - 1) / 2.0;
+        vec3 translation = pos.array() - (grain.array() - 1) / 2.0;
         translation      = translation.array() * voxelSize.array();
 
         auto voxel =

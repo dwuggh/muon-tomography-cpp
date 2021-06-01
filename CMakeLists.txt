@@ -5,7 +5,35 @@ project(muon-tomography CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(BUILD_GRAPHIC "build opengl visualization module" ON)
+option(BUILD_TESTS "build tests" ON)
+
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+
+file(GLOB_RECURSE POCA_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/grid.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/poca.cpp
+  )
+
+set(TERM_NAME mtdensity)
+
+add_executable(${TERM_NAME}
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/bin/terminal.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/readdata.cpp
+  ${POCA_SOURCES}
+  )
+
+target_include_directories(${TERM_NAME} PUBLIC
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  )
+
+target_link_libraries(${TERM_NAME} PRIVATE
+  Eigen3::Eigen
+  )
+
+
+if(BUILD_GRAPHICS)
 
 find_package(Corrade REQUIRED Containers Main)
 include_directories(${CORRADE_INCLUDE_DIRS})
@@ -32,10 +60,6 @@ find_package(MagnumIntegration REQUIRED ImGui)
 
 add_subdirectory(src)
 
-file(GLOB_RECURSE POCA_SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/grid.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/poca.cpp
-  )
 
 add_executable(${PROJECT_NAME}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
@@ -67,21 +91,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   MagnumIntegration::ImGui
   )
 
-set(TERM_NAME ${PROJECT_NAME}_TERM)
-
-add_executable(${TERM_NAME}
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/bin/terminal.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/readdata.cpp
-  ${POCA_SOURCES}
-  )
-
-target_include_directories(${TERM_NAME} PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/src
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-  Eigen3::Eigen
-  )
-
+if(BUILD_TESTS)
 add_subdirectory(test)
+endif()
+endif()
+
+
