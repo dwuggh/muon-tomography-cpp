@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
     // // grid.gen_data_array_1d();
     const int voxel_len = 2;
     // const vec3 r1 = vec3{-295.0, -120.0, -120.0};
-    const vec3 r1 = vec3{-25.0, -25.0, -11.0};
+    const vec3 r1 = vec3{-50.0, -50.0, -11.0};
     // const vec3 r1 = vec3{-50.0, -50.0, -50.0};
     const vec3 r2 = - r1;
     Grid grid{r1, r2, voxel_len};

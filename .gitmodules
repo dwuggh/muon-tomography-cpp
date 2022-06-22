@@ -7,3 +7,9 @@
 [submodule "ThirdParty/googletest"]
 	path = ThirdParty/googletest
 	url = https://github.com/google/googletest.git
+[submodule "ThirdParty/corrade"]
+	path = ThirdParty/corrade
+	url = https://github.com/mosra/corrade.git
+[submodule "ThirdParty/magnum"]
+	path = ThirdParty/magnum
+	url = https://github.com/mosra/magnum.git

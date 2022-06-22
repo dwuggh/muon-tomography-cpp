@@ -15,7 +15,7 @@ def read_density(filename, voxel_size, grid):
     xs = []
     ys = []
     zs = []
-    grain = [25, 25, 11]
+    grain = [50, 50, 11]
     # ds = []
     # max = 0
     for x in range(grain[0]):
@@ -34,5 +34,5 @@ if __name__ == '__main__':
     argc = len(sys.argv)
     filename = sys.argv[1] if argc > 1 else 'result.txt'
     voxel_size = np.array([2, 2, 2])
-    grid = np.array([50, 50, 22])
+    grid = np.array([100, 100, 22])
     read_density(filename, voxel_size, grid)

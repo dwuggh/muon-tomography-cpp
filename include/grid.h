@@ -3,6 +3,7 @@
 #include "utils.h"
 #include <cmath>
 #include <iostream>
+#include <optional>
 
 using vec3i = Eigen::Vector3i;
 
